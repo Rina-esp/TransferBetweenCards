@@ -1,31 +1,21 @@
 package ru.netology.web.page;
 
 import com.codeborne.selenide.SelenideElement;
-import ru.netology.web.data.DataHelper;
 
-import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
 
 public class DashboardRefillCards {
-  private static SelenideElement sumField = $("[class=input__control]");
-  private static SelenideElement cardField = $("[type=tel]");
-  private static SelenideElement replenishButton = $("[class=button__text]");
-  private SelenideElement heading = $("[data-test-id=dashboard]");
+  private static SelenideElement button = $("[data-test-id=action-transfer]");
+  private static SelenideElement error = $("[data-test-id=error-notification]");
 
-
-  public DashboardRefillCards() {
-    heading.shouldBe(visible);
-  }
-
-  public static DashboardCards refill(String sum, DataHelper.CardInfo cardInfo, int number) {
-    sumField.setValue(sum);
-    if (number != 1) {
-      cardField.setValue(cardInfo.getFirstCard());
-    } else {
-      cardField.setValue(cardInfo.getSecondCard());
-    }
-    replenishButton.click();
+  public static DashboardCards fillInfo(String cardNumber, Integer amount) {
+    $("[data-test-id=amount] input").setValue(String.valueOf(amount));
+    $("[data-test-id=from] input").setValue(cardNumber);
+    button.click();
     return new DashboardCards();
   }
+
+  public static void checkError() { error.shouldBe(text("Ошибка! Произошла ошибка")); }
 
 }

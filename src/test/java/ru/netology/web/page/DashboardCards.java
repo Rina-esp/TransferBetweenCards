@@ -2,51 +2,48 @@ package ru.netology.web.page;
 
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
-import lombok.val;
 
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
 public class DashboardCards {
-  private SelenideElement card1 = $("[class=button__content]");
-  private SelenideElement card2 = $$("[class=button__content]").get(1);
-  private ElementsCollection cards = $$(".list__item");
-  private final String balanceStart = "баланс: ";
-  private final String balanceFinish = " р.";
   private SelenideElement heading = $("[data-test-id=dashboard]");
+
+  private static ElementsCollection cards = $$(".list__item>div");
+  private static final String balanceStart = "баланс: ";
+  private static final String balanceFinish = " р.";
+  private final int numberLength = 19;
 
   public DashboardCards() {
     heading.shouldBe(visible);
   }
 
-  public DashboardRefillCards refillFirst() {
-    card1.click();
-    return new DashboardRefillCards();
+  public static String getCardID(String cardNumber) {
+    String cardLastFourNumbers = cardNumber.substring(15);
+    return cards.find(text(cardLastFourNumbers))
+        .getAttribute("data-test-id");
   }
 
-  public DashboardRefillCards refillSecond() {
-    card2.click();
-    return new DashboardRefillCards();
+  public static int getCardBalance(String cardNumber) {
+    var cardId = getCardID(cardNumber);
+    var cardElement = $(".list__item>div[data-test-id='" + cardId + "']");
+    return extractBalance(cardElement.getText());
   }
 
-  public int getFirstCardBalance() {
-    val text = cards.first()
-        .text();
-    return extractBalance(text);
-  }
-
-  public int getSecondCardBalance() {
-    val text = cards.last()
-        .text();
-    return extractBalance(text);
-  }
-
-  private int extractBalance(String text) {
-    val start = text.indexOf(balanceStart);
-    val finish = text.indexOf(balanceFinish);
-    val value = text.substring(start + balanceStart.length(), finish);
+  private static int extractBalance(String text) {
+    var start = text.indexOf(balanceStart);
+    var finish = text.indexOf(balanceFinish);
+    var value = text.substring(start + balanceStart.length(), finish);
     return Integer.parseInt(value);
+  }
+
+  public static DashboardRefillCards selectCard(String cardNumber) {
+    var cardId = getCardID(cardNumber);
+    var cardElement = $(".list__item>div[data-test-id='" + cardId + "']");
+    cardElement.$("button[data-test-id=action-deposit]").click();
+    return new DashboardRefillCards();
   }
 
 }
