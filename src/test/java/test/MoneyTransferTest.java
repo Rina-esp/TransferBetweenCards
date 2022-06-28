@@ -11,7 +11,6 @@ import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MoneyTransferTest {
-  public DashboardCards dashboardCards;
 
   @BeforeEach
   public void setUp() {
@@ -26,74 +25,77 @@ public class MoneyTransferTest {
   // Positive test
   @Test
   void shouldTransferMoneyBetweenRefillCard1() {
-    var firstCardInfo = DataHelper.getFirstCardInfo();
-    firstCardInfo.setBalance(dashboardCards.getCardBalance(firstCardInfo.getNumber()));
-    var secondCardInfo = DataHelper.getSecondCardInfo();
-    secondCardInfo.setBalance(dashboardCards.getCardBalance(secondCardInfo.getNumber()));
-    var amount = DataHelper.getRandomCardAmount(secondCardInfo.getBalance());
-    var DashboardRefillCards = dashboardCards.selectCard(firstCardInfo.getNumber());
-    var updaterDashboardCards = DashboardRefillCards.fillInfo(secondCardInfo.getNumber(), amount);
-    DataHelper.transferCardMoney(secondCardInfo, firstCardInfo, amount);
-    assertEquals(updaterDashboardCards.getCardBalance(firstCardInfo.getNumber()), firstCardInfo.getBalance());
-    assertEquals(updaterDashboardCards.getCardBalance(secondCardInfo.getNumber()), secondCardInfo.getBalance());
+    int transferAmount = 1000;
+    var dashboardCards = new DashboardCards();
+    var card1BalanceStart = dashboardCards.getBalanceCard1();
+    var card2BalanceStart = dashboardCards.getBalanceCard2();
+    dashboardCards.pushButtonTransferCard1();
+    var dashboardRefillCards = new DashboardRefillCards();
+    dashboardRefillCards.transfer(transferAmount, DataHelper.getCard2());
+    assertEquals(card1BalanceStart + transferAmount, dashboardCards.getBalanceCard1());
+    assertEquals(card2BalanceStart - transferAmount, dashboardCards.getBalanceCard2());
+
   }
 
   @Test
   void shouldTransferMoneyBetweenRefillCard2() {
-    var firstCardInfo = DataHelper.getFirstCardInfo();
-    firstCardInfo.setBalance(dashboardCards.getCardBalance(firstCardInfo.getNumber()));
-    var secondCardInfo = DataHelper.getSecondCardInfo();
-    secondCardInfo.setBalance(dashboardCards.getCardBalance(secondCardInfo.getNumber()));
-    var amount = DataHelper.getRandomCardAmount(secondCardInfo.getBalance());
-    var DashboardRefillCards = dashboardCards.selectCard(secondCardInfo.getNumber());
-    var updaterDashboardCards = DashboardRefillCards.fillInfo(firstCardInfo.getNumber(), amount);
-    DataHelper.transferCardMoney(firstCardInfo, secondCardInfo, amount);
-    assertEquals(updaterDashboardCards.getCardBalance(firstCardInfo.getNumber()), firstCardInfo.getBalance());
-    assertEquals(updaterDashboardCards.getCardBalance(secondCardInfo.getNumber()), secondCardInfo.getBalance());
+    int transferAmount = 1000;
+    var dashboardCards = new DashboardCards();
+    var card1BalanceStart = dashboardCards.getBalanceCard1();
+    var card2BalanceStart = dashboardCards.getBalanceCard2();
+    dashboardCards.pushButtonTransferCard2();
+    var dashboardRefillCards = new DashboardRefillCards();
+    dashboardRefillCards.transfer(transferAmount, DataHelper.getCard1());
+    assertEquals(card1BalanceStart - transferAmount, dashboardCards.getBalanceCard1());
+    assertEquals(card2BalanceStart + transferAmount, dashboardCards.getBalanceCard2());
   }
 
   @Test
-  void shouldTransferMoneyBetweenEmptyCards() {
-    var firstCardInfo = DataHelper.getFirstCardInfo();
-    firstCardInfo.setBalance(dashboardCards.getCardBalance(firstCardInfo.getNumber()));
-    var DashboardRefillCards = dashboardCards.selectCard(firstCardInfo.getNumber());
-    DashboardRefillCards.fillInfo(null, null);
-    DashboardRefillCards.checkError();
+  void shouldTransferMoneyBetweenRefillInvalid() {
+    int transferAmount = 1000;
+    var dashboardCards = new DashboardCards();
+    dashboardCards.pushButtonTransferCard1();
+    var dashboardRefillCards = new DashboardRefillCards();
+    dashboardRefillCards.transfer(transferAmount, DataHelper.getInvalidCardNumber());
+    dashboardRefillCards.cardIdError();
   }
 
   // issues bug
 
   @Test
   void shouldTransferMoneyRefillCard1onCard1() {
-    var firstCardInfo = DataHelper.getFirstCardInfo();
-    firstCardInfo.setBalance(dashboardCards.getCardBalance(firstCardInfo.getNumber()));
-    var amount = DataHelper.getRandomCardAmount(firstCardInfo.getBalance());
-    DashboardRefillCards.fillInfo(firstCardInfo.getNumber(), amount);
-    DashboardRefillCards.checkError();
+    var dashboardCards = new DashboardCards();
+    int transferAmount = dashboardCards.getBalanceCard1();
+    dashboardCards.pushButtonTransferCard1();
+    var dashboardRefillCards = new DashboardRefillCards();
+    dashboardRefillCards.transfer(transferAmount, DataHelper.getCard1());
+    dashboardRefillCards.cardIdError();
+
   }
+
 
   @Test
   void shouldTransferMoneyBetweenRefillCard2Exceeding() {
-    var firstCardInfo = DataHelper.getFirstCardInfo();
-    firstCardInfo.setBalance(dashboardCards.getCardBalance(firstCardInfo.getNumber()));
-    var secondCardInfo = DataHelper.getSecondCardInfo();
-    secondCardInfo.setBalance(dashboardCards.getCardBalance(secondCardInfo.getNumber()));
-    var amount = DataHelper.getInvalidCardAmount(firstCardInfo.getBalance());
-    var DashboardRefillCards = dashboardCards.selectCard(firstCardInfo.getNumber());
-    DashboardRefillCards.fillInfo(secondCardInfo.getNumber(), amount);
-    DashboardRefillCards.checkError();
+    var dashboardCards = new DashboardCards();
+    int transferAmount = dashboardCards.getBalanceCard1() + 1;
+    dashboardCards.pushButtonTransferCard2();
+    var dashboardRefillCards = new DashboardRefillCards();
+    dashboardRefillCards.transfer(transferAmount, DataHelper.getCard1());
+    dashboardRefillCards.errorAmountLimit();
   }
 
   @Test
   void shouldTransferMoneyBetweenRefillCard1Zero() {
-    var firstCardInfo = DataHelper.getFirstCardInfo();
-    firstCardInfo.setBalance(dashboardCards.getCardBalance(firstCardInfo.getNumber()));
-    var secondCardInfo = DataHelper.getSecondCardInfo();
-    secondCardInfo.setBalance(dashboardCards.getCardBalance(secondCardInfo.getNumber()));
-    var amount = 0;
-    DashboardRefillCards.fillInfo(firstCardInfo.getNumber(), amount);
-    DashboardRefillCards.checkError();
+    int transferAmount = 0;
+    var dashboardCards = new DashboardCards();
+    var card1BalanceStart = dashboardCards.getBalanceCard1();
+    var card2BalanceStart = dashboardCards.getBalanceCard2();
+    dashboardCards.pushButtonTransferCard1();
+    var dashboardRefillCards = new DashboardRefillCards();
+    dashboardRefillCards.transfer(transferAmount, DataHelper.getCard2());
+//    assertEquals(card1BalanceStart + transferAmount, dashboardCards.getBalanceCard1());
+//    assertEquals(card2BalanceStart - transferAmount, dashboardCards.getBalanceCard2());
+    dashboardRefillCards.errorAmountZero();
   }
-
 
 }

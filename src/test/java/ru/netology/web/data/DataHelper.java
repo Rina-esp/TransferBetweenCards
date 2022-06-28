@@ -1,54 +1,26 @@
 package ru.netology.web.data;
 
-import com.github.javafaker.Faker;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Value;
-
-import java.util.Random;
 
 public class DataHelper {
   private DataHelper() {
   }
 
-  @Data
-  @AllArgsConstructor
+  @Value
   public static class CardInfo {
-    private String number;
-    private int balance;
-    private String nominal;
+    String cardInfo;
   }
 
-  public static CardInfo getFirstCardInfo() {
-    return new CardInfo("5559 0000 0000 0001", 10000, "RUB");
+  public static CardInfo getCard1() {
+    return new CardInfo("5559000000000001");
   }
 
-  public static CardInfo getSecondCardInfo() {
-    return new CardInfo("5559 0000 0000 0002", 10000, "RUB");
+  public static CardInfo getCard2() {
+    return new CardInfo("5559000000000002");
   }
 
-  public static String getRandomCardInfo() {
-    Faker faker = new Faker();
-    return faker.business()
-        .creditCardNumber();
-  }
-
-  public static int getRandomCardAmount(int cardBalance) {
-    Random random = new Random();
-    return random.nextInt(cardBalance);
-  }
-
-  public static int getInvalidCardAmount(int cardBalance) {
-    Random random = new Random();
-    return cardBalance + random.nextInt();
-  }
-
-  public static void transferCardMoney(CardInfo from, CardInfo to, int amount) {
-    int fromBalance = from.getBalance() - amount;
-    int toBalance = to.getBalance() + amount;
-
-    from.setBalance(fromBalance);
-    to.setBalance(toBalance);
+  public static CardInfo getInvalidCardNumber() {
+    return new CardInfo("5559000000000003");
   }
 
   @Value
